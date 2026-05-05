@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quiz App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  <body
+    class="bg-gray-900 text-white flex items-center justify-center h-screen"
+  >
+    <div class="bg-gray-800 p-6 rounded-xl w-[400px] shadow-lg">
+      <!-- Title -->
+      <h1 class="text-2xl font-bold mb-4 text-center">Quiz App 🧠</h1>
+
+      <!-- Progress Bar -->
+      <div class="w-full bg-gray-600 h-2 rounded mb-4">
+        <div
+          id="progress"
+          class="bg-green-400 h-2 rounded"
+          style="width: 0%"
+        ></div>
+      </div>
+
+      <!-- Question -->
+      <h2 id="question" class="text-lg mb-4"></h2>
+
+      <!-- Options -->
+      <div id="options" class="space-y-2"></div>
+
+      <!-- Next Button -->
+      <button
+        onclick="nextQuestion()"
+        class="mt-4 w-full bg-blue-500 hover:bg-blue-600 p-2 rounded"
+      >
+        Next
+      </button>
+
+      <!-- Result -->
+      <div id="result" class="hidden text-center mt-4">
+        <h2 class="text-xl font-bold"></h2>
+        <button
+          onclick="restartQuiz()"
+          class="mt-3 bg-green-500 hover:bg-green-600 p-2 rounded w-full"
+        >
+          Restart Quiz
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const quizData = [
+        {
+          question: "What is the capital of India?",
+          options: ["Mumbai", "Delhi", "Chennai", "Kolkata"],
+          correct: "Delhi",
+        },
+        {
+          question: "Which language is used for web?",
+          options: ["Python", "C", "JavaScript", "Java"],
+          correct: "JavaScript",
+        },
+        {
+          question: "2 + 2 = ?",
+          options: ["3", "4", "5", "6"],
+          correct: "4",
+        },
+      ];
+
+      let currentQ = 0;
+      let score = 0;
+      let selected = null;
+
+      function loadQuestion() {
+        const q = quizData[currentQ];
+        document.getElementById("question").innerText = q.question;
+
+        const optionsDiv = document.getElementById("options");
+        optionsDiv.innerHTML = "";
+
+        q.options.forEach((opt) => {
+          const btn = document.createElement("button");
+          btn.innerText = opt;
+          btn.className = "w-full bg-gray-700 p-2 rounded hover:bg-gray-600";
+
+          btn.onclick = () => {
+            selected = opt;
+            document
+              .querySelectorAll("#options button")
+              .forEach((b) => b.classList.remove("bg-blue-500"));
+            btn.classList.add("bg-blue-500");
+          };
+
+          optionsDiv.appendChild(btn);
+        });
+
+        updateProgress();
+      }
+
+      function nextQuestion() {
+        if (selected === quizData[currentQ].correct) {
+          score++;
+        }
+
+        selected = null;
+        currentQ++;
+
+        if (currentQ < quizData.length) {
+          loadQuestion();
+        } else {
+          showResult();
+        }
+      }
+
+      function updateProgress() {
+        const progress = (currentQ / quizData.length) * 100;
+        document.getElementById("progress").style.width = progress + "%";
+      }
+
+      function showResult() {
+        document.getElementById("question").style.display = "none";
+        document.getElementById("options").style.display = "none";
+
+        document.querySelector("button").style.display = "none";
+
+        const resultDiv = document.getElementById("result");
+        resultDiv.classList.remove("hidden");
+
+        resultDiv.querySelector("h2").innerText =
+          `Your Score: ${score} / ${quizData.length}`;
+      }
+
+      function restartQuiz() {
+        currentQ = 0;
+        score = 0;
+        selected = null;
+
+        document.getElementById("question").style.display = "block";
+        document.getElementById("options").style.display = "block";
+        document.querySelector("button").style.display = "block";
+
+        document.getElementById("result").classList.add("hidden");
+
+        loadQuestion();
+      }
+
+      loadQuestion();
+    </script>
+  </body>
+</html>
