@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
+    <title>SecureVault | Intelligent Password Generator & Saver</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family:
+          "Segoe UI",
+          "Inter",
+          system-ui,
+          -apple-system,
+          "Poppins",
+          sans-serif;
+      }
+
+      body {
+        min-height: 100vh;
+        background: linear-gradient(145deg, #0b1120 0%, #111827 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 1.5rem;
+      }
+
+      /* main glassmorphic card */
+      .vault-card {
+        max-width: 650px;
+        width: 100%;
+        background: rgba(18, 25, 45, 0.75);
+        backdrop-filter: blur(12px);
+        border-radius: 3rem;
+        box-shadow:
+          0 25px 45px rgba(0, 0, 0, 0.5),
+          0 0 0 1px rgba(94, 129, 244, 0.2);
+        padding: 2rem 1.8rem;
+        transition: all 0.2s ease;
+        border: 1px solid rgba(72, 120, 255, 0.3);
+      }
+
+      h1 {
+        font-size: 1.9rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #e0e7ff, #a5c9ff);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        display: inline-block;
+        letter-spacing: -0.3px;
+        margin-bottom: 0.4rem;
+      }
+
+      .sub {
+        color: #9bb2d4;
+        font-size: 0.85rem;
+        border-left: 3px solid #3b82f6;
+        padding-left: 0.75rem;
+        margin-top: 0.25rem;
+        margin-bottom: 1.8rem;
+      }
+
+      /* password display area */
+      .password-area {
+        background: #0f172a;
+        border-radius: 2rem;
+        padding: 0.25rem;
+        border: 1px solid #2d3a5e;
+        transition: 0.2s;
+        margin-bottom: 1.8rem;
+      }
+
+      .password-wrapper {
+        display: flex;
+        align-items: center;
+        background: #030712ce;
+        border-radius: 2rem;
+        padding: 0.2rem 0.2rem 0.2rem 1.5rem;
+        gap: 10px;
+      }
+
+      #passwordInput {
+        flex: 1;
+        background: transparent;
+        border: none;
+        font-size: 1.3rem;
+        font-weight: 500;
+        font-family: "Fira Mono", "Cascadia Code", monospace;
+        color: #e2e8f0;
+        padding: 1rem 0;
+        letter-spacing: 0.5px;
+        outline: none;
+        word-break: break-all;
+      }
+
+      .copy-btn,
+      .refresh-btn {
+        background: #1e293b;
+        border: none;
+        width: 46px;
+        height: 46px;
+        border-radius: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #cbd5e6;
+        font-size: 1.3rem;
+      }
+
+      .copy-btn:hover,
+      .refresh-btn:hover {
+        background: #334155;
+        color: white;
+        transform: scale(0.96);
+      }
+
+      .strength-meter {
+        margin: 1rem 0 1.5rem 0;
+      }
+
+      .strength-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        margin-bottom: 6px;
+        color: #9aa9c1;
+      }
+
+      .strength-bar-bg {
+        height: 8px;
+        background: #1e2a3e;
+        border-radius: 20px;
+        overflow: hidden;
+      }
+
+      #strengthFill {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #ef4444, #f97316, #eab308, #22c55e);
+        border-radius: 20px;
+        transition: width 0.2s ease;
+      }
+
+      /* controls grid */
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin: 1.5rem 0 1.8rem;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .length-control {
+        background: #0f172ac9;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .length-control label {
+        font-weight: 500;
+        color: #bfd6ff;
+      }
+
+      #lengthSlider {
+        width: 170px;
+        cursor: pointer;
+        background: #2d3a5e;
+        height: 4px;
+        border-radius: 10px;
+      }
+
+      #lengthValue {
+        background: #1f2a44;
+        padding: 4px 10px;
+        border-radius: 30px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: white;
+        min-width: 45px;
+        text-align: center;
+      }
+
+      .options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        background: #0f172a80;
+        padding: 0.6rem 1rem;
+        border-radius: 2rem;
+      }
+
+      .option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #cbd5f0;
+      }
+
+      .option input {
+        width: 18px;
+        height: 18px;
+        accent-color: #3b82f6;
+        cursor: pointer;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+      }
+
+      .btn-primary {
+        background: linear-gradient(95deg, #2563eb, #1e40af);
+        border: none;
+        padding: 0.8rem 1.6rem;
+        border-radius: 3rem;
+        font-weight: 600;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        font-size: 0.9rem;
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(95deg, #3b82f6, #1e3a8a);
+        transform: translateY(-1px);
+      }
+
+      .btn-outline {
+        background: transparent;
+        border: 1px solid #3b6ad7;
+        padding: 0.8rem 1.4rem;
+        border-radius: 3rem;
+        font-weight: 500;
+        color: #b9d0ff;
+        cursor: pointer;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-outline:hover {
+        background: #1e2b4f;
+        border-color: #5f8df5;
+        color: white;
+      }
+
+      /* saved passwords section */
+      .saved-section {
+        margin-top: 1rem;
+        border-top: 1px solid #2d3a62;
+        padding-top: 1.2rem;
+      }
+
+      .saved-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+      }
+
+      .saved-header h3 {
+        color: #b9d0ff;
+        font-weight: 600;
+        font-size: 1.1rem;
+      }
+
+      #clearAllBtn {
+        background: none;
+        border: none;
+        color: #f87171;
+        font-size: 0.75rem;
+        cursor: pointer;
+        font-weight: 500;
+        padding: 4px 10px;
+        border-radius: 30px;
+        transition: 0.2s;
+      }
+
+      #clearAllBtn:hover {
+        background: #3b1e2a;
+        color: #ffa3a3;
+      }
+
+      .password-list {
+        max-height: 280px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+      }
+
+      .password-item {
+        background: #111827b3;
+        border-radius: 1.5rem;
+        padding: 0.6rem 0.9rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        border-left: 3px solid #3b82f6;
+        transition: 0.1s;
+      }
+
+      .pass-text {
+        font-family: monospace;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        color: #cbdff2;
+        word-break: break-all;
+        flex: 1;
+      }
+
+      .item-actions {
+        display: flex;
+        gap: 10px;
+      }
+
+      .item-actions button {
+        background: #1f2b44;
+        border: none;
+        color: #aac3ff;
+        border-radius: 30px;
+        font-size: 0.7rem;
+        padding: 5px 12px;
+        cursor: pointer;
+        transition: 0.1s;
+      }
+
+      .item-actions button:hover {
+        background: #2c3c64;
+        color: white;
+      }
+
+      .toast-msg {
+        position: fixed;
+        bottom: 25px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e293bdd;
+        backdrop-filter: blur(12px);
+        color: #c3e88d;
+        padding: 0.6rem 1.2rem;
+        border-radius: 60px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        pointer-events: none;
+        z-index: 1000;
+        transition: opacity 0.2s;
+        opacity: 0;
+        border: 1px solid #5f8ef9;
+      }
+
+      @media (max-width: 540px) {
+        .vault-card {
+          padding: 1.3rem;
+        }
+        .password-wrapper {
+          padding-left: 0.8rem;
+        }
+        #passwordInput {
+          font-size: 1rem;
+        }
+        .controls {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .options {
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="vault-card">
+      <h1>🔐 CypherForge</h1>
+      <div class="sub">AI-strong passwords • instant save • vault keeper</div>
+
+      <!-- password display block -->
+      <div class="password-area">
+        <div class="password-wrapper">
+          <input
+            type="text"
+            id="passwordInput"
+            readonly
+            placeholder="Your strong password..."
+          />
+          <button class="copy-btn" id="copyBtn" title="Copy to clipboard">
+            📋
+          </button>
+          <button
+            class="refresh-btn"
+            id="generateBtn"
+            title="Generate new strong password"
+          >
+            🔄
+          </button>
+        </div>
+      </div>
+
+      <!-- strength meter -->
+      <div class="strength-meter">
+        <div class="strength-label">
+          <span>🔒 Password strength</span>
+          <span id="strengthText">Moderate</span>
+        </div>
+        <div class="strength-bar-bg">
+          <div id="strengthFill"></div>
+        </div>
+      </div>
+
+      <!-- customization controls -->
+      <div class="controls">
+        <div class="length-control">
+          <label>📏 Length</label>
+          <input type="range" id="lengthSlider" min="8" max="40" value="16" />
+          <span id="lengthValue">16</span>
+        </div>
+        <div class="options">
+          <label class="option"
+            ><input type="checkbox" id="useUpper" checked /> A-Z</label
+          >
+          <label class="option"
+            ><input type="checkbox" id="useLower" checked /> a-z</label
+          >
+          <label class="option"
+            ><input type="checkbox" id="useDigits" checked /> 0-9</label
+          >
+          <label class="option"
+            ><input type="checkbox" id="useSymbols" checked /> !@#$%</label
+          >
+        </div>
+      </div>
+
+      <div class="action-buttons">
+        <button class="btn-primary" id="generateAndSaveBtn">
+          ✨ Generate & Save Current
+        </button>
+        <button class="btn-outline" id="saveCurrentBtn">
+          💾 Save displayed password
+        </button>
+      </div>
+
+      <!-- saved passwords area -->
+      <div class="saved-section">
+        <div class="saved-header">
+          <h3>📜 Saved Passwords Vault</h3>
+          <button id="clearAllBtn">🗑️ Clear all</button>
+        </div>
+        <div id="passwordListContainer" class="password-list">
+          <!-- dynamically listed saved passwords -->
+          <div style="text-align: center; color: #5b6e8c; padding: 1rem">
+            No saved passwords yet. Generate & save one!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toastMsg" class="toast-msg">✨ Action complete</div>
+
+    <script>
+      // ---------- DOM elements ----------
+      const passwordInput = document.getElementById("passwordInput");
+      const generateBtn = document.getElementById("generateBtn");
+      const copyBtn = document.getElementById("copyBtn");
+      const lengthSlider = document.getElementById("lengthSlider");
+      const lengthValue = document.getElementById("lengthValue");
+      const useUpper = document.getElementById("useUpper");
+      const useLower = document.getElementById("useLower");
+      const useDigits = document.getElementById("useDigits");
+      const useSymbols = document.getElementById("useSymbols");
+      const strengthFill = document.getElementById("strengthFill");
+      const strengthTextSpan = document.getElementById("strengthText");
+      const generateAndSaveBtn = document.getElementById("generateAndSaveBtn");
+      const saveCurrentBtn = document.getElementById("saveCurrentBtn");
+      const clearAllBtn = document.getElementById("clearAllBtn");
+      const passwordListContainer = document.getElementById(
+        "passwordListContainer",
+      );
+
+      // ---------- character sets ----------
+      const LOWERS = "abcdefghijklmnopqrstuvwxyz";
+      const UPPERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const DIGITS = "0123456789";
+      const SYMBOLS = "!@#$%^&*()_+[]{}<>?,./~-";
+
+      // ---------- local storage key ----------
+      const STORAGE_KEY = "secure_vault_passwords";
+
+      // ---------- Helper: Load vault from localStorage ----------
+      let savedPasswords = [];
+
+      function loadVault() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          try {
+            savedPasswords = JSON.parse(stored);
+            if (!Array.isArray(savedPasswords)) savedPasswords = [];
+          } catch (e) {
+            savedPasswords = [];
+          }
+        } else {
+          savedPasswords = [];
+        }
+        renderVaultList();
+      }
+
+      function saveVaultToLocal() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedPasswords));
+        renderVaultList();
+      }
+
+      // add password to vault (avoid duplicates? no but we allow, but timestamp)
+      function addPasswordToVault(password) {
+        if (!password || password.trim() === "") return false;
+        // avoid adding exact duplicate many times but it's okay, but useful filter: optional warning
+        // we allow it, but you might want but fine.
+        savedPasswords.unshift({
+          id: Date.now() + Math.random() * 10000,
+          value: password,
+          createdAt: new Date().toLocaleString(),
+        });
+        saveVaultToLocal();
+        showToast("🔐 Password saved to vault!");
+        return true;
+      }
+
+      function removePasswordById(id) {
+        savedPasswords = savedPasswords.filter((p) => p.id != id);
+        saveVaultToLocal();
+        showToast("Removed from vault");
+      }
+
+      function clearAllPasswords() {
+        if (
+          savedPasswords.length > 0 &&
+          confirm("⚠️ Delete ALL saved passwords? This action is permanent.")
+        ) {
+          savedPasswords = [];
+          saveVaultToLocal();
+          showToast("🗑️ All passwords cleared");
+        } else if (savedPasswords.length === 0) {
+          showToast("Vault already empty", 1500);
+        }
+      }
+
+      function renderVaultList() {
+        if (!passwordListContainer) return;
+        if (savedPasswords.length === 0) {
+          passwordListContainer.innerHTML = `<div style="text-align: center; color: #5b6e8c; padding: 1rem;">✨ No saved passwords. Generate & save one!</div>`;
+          return;
+        }
+        const fragment = document.createDocumentFragment();
+        savedPasswords.forEach((item) => {
+          const div = document.createElement("div");
+          div.className = "password-item";
+          div.innerHTML = `
+                <span class="pass-text">${escapeHtml(item.value)}</span>
+                <div class="item-actions">
+                    <button class="copy-item-btn" data-pass="${escapeHtml(item.value)}">📋 Copy</button>
+                    <button class="delete-item-btn" data-id="${item.id}">🗑️ Delete</button>
+                </div>
+            `;
+          fragment.appendChild(div);
+        });
+        passwordListContainer.innerHTML = "";
+        passwordListContainer.appendChild(fragment);
+
+        // attach event listeners for dynamic buttons
+        document.querySelectorAll(".copy-item-btn").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            const pass = btn.getAttribute("data-pass");
+            copyToClipboard(pass);
+            showToast("Copied from vault!");
+          });
+        });
+        document.querySelectorAll(".delete-item-btn").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            const id = parseFloat(btn.getAttribute("data-id"));
+            removePasswordById(id);
+          });
+        });
+      }
+
+      // simple escape to avoid XSS
+      function escapeHtml(str) {
+        return str
+          .replace(/[&<>]/g, function (m) {
+            if (m === "&") return "&amp;";
+            if (m === "<") return "&lt;";
+            if (m === ">") return "&gt;";
+            return m;
+          })
+          .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function (c) {
+            return c;
+          });
+      }
+
+      // ---------- strong password generation logic (adaptive & cryptographically strong) ----------
+      function generateStrongPassword() {
+        let length = parseInt(lengthSlider.value, 10);
+        let upperEnabled = useUpper.checked;
+        let lowerEnabled = useLower.checked;
+        let digitEnabled = useDigits.checked;
+        let symbolEnabled = useSymbols.checked;
+
+        // at least one category must be active, else fallback
+        if (!upperEnabled && !lowerEnabled && !digitEnabled && !symbolEnabled) {
+          // fallback: enable lower + digits
+          useLower.checked = true;
+          useDigits.checked = true;
+          lowerEnabled = true;
+          digitEnabled = true;
+          showToast("⚠️ Enabled letters+digits by default", 1200);
+        }
+
+        let charset = "";
+        if (upperEnabled) charset += UPPERS;
+        if (lowerEnabled) charset += LOWERS;
+        if (digitEnabled) charset += DIGITS;
+        if (symbolEnabled) charset += SYMBOLS;
+
+        if (charset.length === 0) charset = LOWERS + DIGITS; // ultimate fallback
+
+        let password = "";
+        const cryptoArray = new Uint8Array(length);
+        if (window.crypto && window.crypto.getRandomValues) {
+          window.crypto.getRandomValues(cryptoArray);
+          for (let i = 0; i < length; i++) {
+            const randomIndex = cryptoArray[i] % charset.length;
+            password += charset[randomIndex];
+          }
+        } else {
+          // fallback for very old browsers
+          for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * charset.length);
+            password += charset[randomIndex];
+          }
+        }
+
+        // Ensure password contains at least one char from each selected category (quality boost)
+        let finalPass = ensureCategories(
+          password,
+          upperEnabled,
+          lowerEnabled,
+          digitEnabled,
+          symbolEnabled,
+          charset,
+          length,
+        );
+        return finalPass;
+      }
+
+      function ensureCategories(
+        pw,
+        upperReq,
+        lowerReq,
+        digitReq,
+        symbolReq,
+        fullCharset,
+        desiredLen,
+      ) {
+        let hasUpper = /[A-Z]/.test(pw);
+        let hasLower = /[a-z]/.test(pw);
+        let hasDigit = /\d/.test(pw);
+        let hasSymbol = /[!@#$%^&*()_+[\]{}<>?,./~-]/.test(pw);
+
+        let needed = [];
+        if (upperReq && !hasUpper) needed.push(getRandomChar(UPPERS));
+        if (lowerReq && !hasLower) needed.push(getRandomChar(LOWERS));
+        if (digitReq && !hasDigit) needed.push(getRandomChar(DIGITS));
+        if (symbolReq && !hasSymbol) needed.push(getRandomChar(SYMBOLS));
+
+        if (needed.length === 0) return pw;
+        // replace first N characters or extend? Better replace at random positions
+        let pwArray = pw.split("");
+        for (let i = 0; i < needed.length; i++) {
+          if (pwArray.length > i) {
+            pwArray[i] = needed[i];
+          } else {
+            pwArray.push(needed[i]);
+          }
+        }
+        let final = pwArray.join("");
+        if (final.length < desiredLen && desiredLen > final.length) {
+          // add extra random chars from full charset
+          let extraLen = desiredLen - final.length;
+          let extra = "";
+          for (let i = 0; i < extraLen; i++) {
+            extra += getRandomChar(fullCharset);
+          }
+          final += extra;
+        } else if (final.length > desiredLen) {
+          final = final.slice(0, desiredLen);
+        }
+        return final;
+      }
+
+      function getRandomChar(set) {
+        if (!set.length) return "a";
+        if (window.crypto) {
+          const rand = new Uint8Array(1);
+          crypto.getRandomValues(rand);
+          return set[rand[0] % set.length];
+        }
+        return set[Math.floor(Math.random() * set.length)];
+      }
+
+      // update strength meter based on password entropy and composition
+      function updateStrengthMeter(password) {
+        let score = 0;
+        const len = password.length;
+        if (len >= 12) score += 25;
+        else if (len >= 10) score += 18;
+        else if (len >= 8) score += 12;
+        else score += 5;
+
+        let variety = 0;
+        if (/[a-z]/.test(password)) variety++;
+        if (/[A-Z]/.test(password)) variety++;
+        if (/\d/.test(password)) variety++;
+        if (/[!@#$%^&*()_+[\]{}<>?,./~-]/.test(password)) variety++;
+        score += variety * 12;
+
+        let uniqueChars = new Set(password.split("")).size;
+        score += Math.min(20, uniqueChars * 1.5);
+
+        let finalScore = Math.min(100, Math.floor(score));
+        let strengthWidth = finalScore + "%";
+        strengthFill.style.width = strengthWidth;
+
+        if (finalScore < 35) strengthTextSpan.innerText = "💀 Very Weak";
+        else if (finalScore < 55) strengthTextSpan.innerText = "⚠️ Weak";
+        else if (finalScore < 75) strengthTextSpan.innerText = "🟡 Moderate";
+        else if (finalScore < 90) strengthTextSpan.innerText = "🟢 Strong";
+        else strengthTextSpan.innerText = "💪 Fortress";
+
+        if (finalScore >= 75)
+          strengthFill.style.background =
+            "linear-gradient(90deg, #22c55e, #16a34a)";
+        else if (finalScore >= 55)
+          strengthFill.style.background =
+            "linear-gradient(90deg, #eab308, #ca8a04)";
+        else
+          strengthFill.style.background =
+            "linear-gradient(90deg, #ef4444, #dc2626)";
+      }
+
+      // refresh password on UI
+      function refreshAndShowPassword() {
+        const newPass = generateStrongPassword();
+        passwordInput.value = newPass;
+        updateStrengthMeter(newPass);
+        return newPass;
+      }
+
+      // copy to clipboard
+      function copyToClipboard(text) {
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard
+            .writeText(text)
+            .then(() => {
+              showToast("📋 Copied to clipboard!");
+            })
+            .catch(() => fallbackCopy(text));
+        } else {
+          fallbackCopy(text);
+        }
+      }
+
+      function fallbackCopy(text) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        showToast("📋 Copied (fallback)");
+      }
+
+      function showToast(message, duration = 1800) {
+        const toast = document.getElementById("toastMsg");
+        if (!toast) return;
+        toast.textContent = message;
+        toast.style.opacity = "1";
+        setTimeout(() => {
+          toast.style.opacity = "0";
+        }, duration);
+      }
+
+      // save currently displayed password (input box)
+      function saveDisplayedPassword() {
+        const currentPwd = passwordInput.value;
+        if (!currentPwd || currentPwd.trim() === "") {
+          showToast("❌ No password to save! Generate one first.", 1500);
+          return false;
+        }
+        addPasswordToVault(currentPwd);
+        return true;
+      }
+
+      // generate fresh & auto-save (suggest & store)
+      function generateAndSaveNew() {
+        const fresh = refreshAndShowPassword();
+        addPasswordToVault(fresh);
+      }
+
+      // event listeners
+      function bindEvents() {
+        generateBtn.addEventListener("click", () => refreshAndShowPassword());
+        copyBtn.addEventListener("click", () => {
+          if (passwordInput.value) copyToClipboard(passwordInput.value);
+          else showToast("Nothing to copy", 1000);
+        });
+        lengthSlider.addEventListener("input", (e) => {
+          lengthValue.innerText = e.target.value;
+          refreshAndShowPassword();
+        });
+        const optionChecks = [useUpper, useLower, useDigits, useSymbols];
+        optionChecks.forEach((chk) =>
+          chk.addEventListener("change", () => refreshAndShowPassword()),
+        );
+        generateAndSaveBtn.addEventListener("click", generateAndSaveNew);
+        saveCurrentBtn.addEventListener("click", saveDisplayedPassword);
+        clearAllBtn.addEventListener("click", clearAllPasswords);
+      }
+
+      // initialize: load vault, set first password, render
+      function init() {
+        loadVault();
+        bindEvents();
+        // generate initial strong password
+        const initPwd = generateStrongPassword();
+        passwordInput.value = initPwd;
+        updateStrengthMeter(initPwd);
+        lengthValue.innerText = lengthSlider.value;
+      }
+
+      init();
+    </script>
+  </body>
+</html>
